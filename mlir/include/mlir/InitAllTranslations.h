@@ -18,6 +18,8 @@ namespace mlir {
 
 void registerFromLLVMIRTranslation();
 void registerFromSPIRVTranslation();
+void registerToCppTranslation();
+void registerToCTranslation();
 void registerToLLVMIRTranslation();
 void registerToSPIRVTranslation();
 
@@ -28,6 +30,8 @@ inline void registerAllTranslations() {
   static bool initOnce = []() {
     registerFromLLVMIRTranslation();
     registerFromSPIRVTranslation();
+    registerToCppTranslation();
+    registerToCTranslation();
     registerToLLVMIRTranslation();
     registerToSPIRVTranslation();
     return true;
