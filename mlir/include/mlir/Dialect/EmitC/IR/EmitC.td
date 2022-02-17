@@ -102,10 +102,10 @@ def EmitC_ConstantOp : EmitC_Op<"constant", [ConstantLike]> {
     // Integer constant
     %0 = "emitc.constant"(){value = 42 : i32} : () -> i32
 
-    // Constant emitted as `int32_t* = NULL;`
+    // Constant emitted as `char = CHAR_MIN;`
     %1 = "emitc.constant"()
-        {value = #emitc.opaque<"NULL"> : !emitc.opaque<"int32_t*">}
-        : () -> !emitc.opaque<"int32_t*">
+        {value = #emitc.opaque<"CHAR_MIN"> : !emitc.opaque<"char">}
+        : () -> !emitc.opaque<"char">
     ```
   }];
 
@@ -144,6 +144,35 @@ def EmitC_IncludeOp
     UnitAttr:$is_standard_include
   );
   let hasCustomAssemblyFormat = 1;
+}
+
+def EmitC_VariableOp : EmitC_Op<"variable", []> {
+  let summary = "Variable operation";
+  let description = [{
+    The `variable` operation produces an SSA value equal to some value
+    specified by an attribute. This can be used to form simple integer and
+    floating point variables, as well as more exotic things like tensor
+    variables. The `variable` operation also supports the EmitC opaque
+    attribute and the EmitC opaque type.
+    The `variable` is emitted as a C/C++ local variable.
+
+    Example:
+
+    ```mlir
+    // Integer variable
+    %0 = "emitc.variable"(){value = 42 : i32} : () -> i32
+
+    // Variable emitted as `int32_t* = NULL;`
+    %1 = "emitc.variable"()
+        {value = #emitc.opaque<"NULL"> : !emitc.opaque<"int32_t*">}
+        : () -> !emitc.opaque<"int32_t*">
+    ```
+  }];
+
+  let arguments = (ins AnyAttr:$value);
+  let results = (outs AnyType);
+
+  let hasVerifier = 1;
 }
 
 #endif // MLIR_DIALECT_EMITC_IR_EMITC
