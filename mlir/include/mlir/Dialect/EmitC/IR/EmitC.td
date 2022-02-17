@@ -94,7 +94,8 @@ def EmitC_ConstantOp : EmitC_Op<"constant", [ConstantLike]> {
     specified by an attribute. This can be used to form simple integer and
     floating point constants, as well as more exotic things like tensor
     constants. The `constant` operation also supports the EmitC opaque
-    attribute and the EmitC opaque type.
+    attribute and the EmitC opaque type. Since folding is supported,
+    it should not be used with pointers.
 
     Example:
 
@@ -102,10 +103,10 @@ def EmitC_ConstantOp : EmitC_Op<"constant", [ConstantLike]> {
     // Integer constant
     %0 = "emitc.constant"(){value = 42 : i32} : () -> i32
 
-    // Constant emitted as `int32_t* = NULL;`
+    // Constant emitted as `char = CHAR_MIN;`
     %1 = "emitc.constant"()
-        {value = #emitc.opaque<"NULL"> : !emitc.opaque<"int32_t*">}
-        : () -> !emitc.opaque<"int32_t*">
+        {value = #emitc.opaque<"CHAR_MIN"> : !emitc.opaque<"char">}
+        : () -> !emitc.opaque<"char">
     ```
   }];
 
@@ -144,6 +145,47 @@ def EmitC_IncludeOp
     UnitAttr:$is_standard_include
   );
   let hasCustomAssemblyFormat = 1;
+}
+
+def EmitC_VariableOp : EmitC_Op<"variable", []> {
+  let summary = "Variable operation";
+  let description = [{
+    The `variable` operation produces an SSA value equal to some value
+    specified by an attribute. This can be used to form simple integer and
+    floating point variables, as well as more exotic things like tensor
+    variables. The `variable` operation also supports the EmitC opaque
+    attribute and the EmitC opaque type. If further supports the EmitC
+    pointer type, whereas folding is not supported.
+    The `variable` is emitted as a C/C++ local variable.
+
+    Example:
+
+    ```mlir
+    // Integer variable
+    %0 = "emitc.variable"(){value = 42 : i32} : () -> i32
+
+    // Variable emitted as `int32_t* = NULL;`
+    %1 = "emitc.variable"()
+        {value = #emitc.opaque<"NULL"> : !emitc.opaque<"int32_t*">}
+        : () -> !emitc.opaque<"int32_t*">
+    ```
+
+    Since folding is not supported, it can be used with pointers.
+    As an example, it is valid to create pointers to `variable` operations
+    by using `apply` operations and pass these to a `call` operation.
+    ```mlir
+    %0 = "emitc.variable"() {value = 0 : i32} : () -> i32
+    %1 = "emitc.variable"() {value = 0 : i32} : () -> i32
+    %2 = emitc.apply "&"(%0) : (i32) -> !emitc.ptr<i32>
+    %3 = emitc.apply "&"(%1) : (i32) -> !emitc.ptr<i32>
+    emitc.call "write"(%2, %3) : (!emitc.ptr<i32>, !emitc.ptr<i32>) -> ()
+    ```
+  }];
+
+  let arguments = (ins AnyAttr:$value);
+  let results = (outs AnyType);
+
+  let hasVerifier = 1;
 }
 
 #endif // MLIR_DIALECT_EMITC_IR_EMITC
