@@ -63,6 +63,25 @@ LogicalResult ApplyOp::verify() {
 }
 
 //===----------------------------------------------------------------------===//
+// CastOp
+//===----------------------------------------------------------------------===//
+
+bool CastOp::areCastCompatible(TypeRange inputs, TypeRange outputs) {
+  if (inputs.size() != 1 || outputs.size() != 1)
+    return false;
+
+  Type input = inputs.front(), output = outputs.front();
+
+  if ((!input.isa<IntegerType, FloatType, IndexType, emitc::OpaqueType,
+                  emitc::PointerType>()) ||
+      (!output.isa<IntegerType, FloatType, IndexType, emitc::OpaqueType,
+                   emitc::PointerType>()))
+    return false;
+
+  return true;
+}
+
+//===----------------------------------------------------------------------===//
 // CallOp
 //===----------------------------------------------------------------------===//
 
