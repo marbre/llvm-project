@@ -25,7 +25,12 @@ def Standalone_Dialect : Dialect {
     }];
     let cppNamespace = "::mlir::standalone";
 
+    let useDefaultTypePrinterParser = 1;
     let useFoldAPI = kEmitFoldAdaptorFolder;
+
+    let extraClassDeclaration = [{
+        void registerTypes();
+    }];
 }
 
 //===----------------------------------------------------------------------===//
