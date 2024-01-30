@@ -847,6 +847,9 @@ static LogicalResult printFunctionBody(CppEmitter &emitter,
         return failure();
     }
   }
+
+  os.unindent();
+
   return success();
 }
 
@@ -873,7 +876,7 @@ static LogicalResult printOperation(CppEmitter &emitter,
   os << ") {\n";
   if (failed(printFunctionBody(emitter, operation, functionOp.getBlocks())))
     return failure();
-  os.unindent() << "}\n";
+  os << "}\n";
 
   return success();
 }
@@ -907,7 +910,7 @@ static LogicalResult printOperation(CppEmitter &emitter,
   os << ") {\n";
   if (failed(printFunctionBody(emitter, operation, functionOp.getBlocks())))
     return failure();
-  os.unindent() << "}\n";
+  os << "}\n";
 
   return success();
 }
